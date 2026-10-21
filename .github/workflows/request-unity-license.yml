@@ -1,0 +1,14 @@
+name: 1 - Request Unity activation file (once)
+on: workflow_dispatch
+jobs:
+  alf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: game-ci/unity-request-activation-file@v2
+        id: req
+        with:
+          unityVersion: 2019.4.40f1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Unity_v2019.4.40f1.alf
+          path: ${{ steps.req.outputs.filePath }}

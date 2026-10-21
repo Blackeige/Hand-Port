@@ -1,0 +1,40 @@
+name: 2 - Build Android APK
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pristine upstream at the pinned commit
+        run: |
+          UP=$(grep '^repo:' UPSTREAM.txt | awk '{print $2}'); SHA=$(grep '^commit:' UPSTREAM.txt | awk '{print $2}')
+          git clone --filter=blob:none "$UP" upstream
+          git -C upstream checkout "$SHA"
+      - name: Assemble the port (drops Oculus SDK, adds overlay, downloads MediaPipe model)
+        run: python3 tools/apply_port.py --upstream upstream --out Project --model
+      - uses: actions/cache@v4
+        with:
+          path: Project/Library
+          key: Library-android-${{ hashFiles('overlay/**', 'UPSTREAM.txt') }}
+          restore-keys: Library-android-
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: Project
+          unityVersion: 2019.4.40f1
+          targetPlatform: Android
+          buildMethod: HandPlayground.Editor.PortBuild.BuildAndroid
+          allowDirtyBuild: true
+      - name: Verify the APK really exists
+        run: |
+          APK=$(ls Project/Builds/Android/*.apk)
+          ls -l "$APK"; unzip -tq "$APK"
+          unzip -l "$APK" | grep -E "lib/arm64-v8a|hand_landmarker.task|AndroidManifest" | head -20
+          echo "APK_BYTES=$(stat -c %s "$APK")" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HandPlaygroundCardboard-debug-apk
+          path: Project/Builds/Android/*.apk

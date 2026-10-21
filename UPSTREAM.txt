@@ -1,0 +1,4 @@
+repo:   https://github.com/Spatial-Cinematics/Handtracking-Physics
+commit: 13e91113401e1fe8e40c8233396f0900d0dbb86d  (2020-04-24, "Left hand colliders still need inprovement, but in workable state")
+license: Apache-2.0
+unity:  2019.3.2f1 (upstream) -> 2019.4.40f1 (port)
