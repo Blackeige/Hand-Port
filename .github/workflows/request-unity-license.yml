@@ -1,14 +1,15 @@
+
 name: 1 - Request Unity activation file (once)
-on: workflow_dispatch
+
+on:
+  workflow_dispatch: {}
+
 jobs:
-  alf:
+  activation:
+    name: Check Unity activation instructions
     runs-on: ubuntu-latest
     steps:
-      - uses: game-ci/unity-request-activation-file@v2
-        id: req
-        with:
-          unityVersion: 2019.4.40f1
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Unity_v2019.4.40f1.alf
-          path: ${{ steps.req.outputs.filePath }}
+      - name: Activation instructions
+        run: |
+          echo "The old ALF activation action is deprecated."
+          echo "Follow https://game.ci/docs/github/activation/"
